@@ -10,48 +10,49 @@ const API_PATH = '/v1/tab-info-service/racing/next-to-go/races';
 
 class App extends Component {
 
-  state = { races: [], jurisdiction: 'NSW',  raceType: 'R', error: false }
-
-  componentDidMount = () => {
-    this.getNSW()
-      .then(res => {
-        this.setState({ races: res.data.races })
-      })
-      .catch(this.onError);
+  state = {
+    races        : [],
+    jurisdiction : 'NSW',
+    raceType     : 'R',
+    error        : false,
+    loading      : false
   }
 
-  getNSW = () => axios.get(API_PATH + '?jurisdiction=NSW')
+  componentDidMount = () => {
+    this.getRaces(this.state.jurisdiction)
+      .then(res => {
+        this.setState({ races: res.data.races })
+      });
+  }
 
-  getVIC = () => axios.get(API_PATH + '?jurisdiction=VIC')
-
-  onError = () => {
-     this.setState({ error: true });
+  getRaces = (jurisdiction) => {
+    this.setState({ loading: true })
+    return axios.get(API_PATH + '?jurisdiction=' + jurisdiction)
+      .then(res => {
+        this.setState({ loading: false })
+        return res;
+      })
+      .catch(err => {
+        this.setState({
+          loading: false,
+          error: true
+        });
+      });
   }
 
   onJurisdictionChanged = (e) => {
-    const jurisdiction = e.currentTarget.value
-    const get = () => {
-      switch (jurisdiction) {
-        case 'NSW':
-          return this.getNSW();
-        case 'VIC':
-        default:
-          return this.getVIC();
-      }
-    }
-
-    get()
+    const jurisdiction = e.currentTarget.value;
+    this.getRaces(jurisdiction)
       .then(res => {
         this.setState({
-          jurisdiction: jurisdiction,
-          races       : res.data.races
+          jurisdiction : jurisdiction,
+          races        : res.data.races
         });
-      })
-      .catch(this.onError);
+      });
   }
 
   onRaceTypeChanged = (e) => {
-    this.setState({ raceType: e.currentTarget.value })
+    this.setState({ raceType: e.currentTarget.value });
   }
 
   render() {
@@ -79,7 +80,7 @@ class App extends Component {
 
           </div>
 
-          <div className="row">
+          <div className="row cards">
             <Cards races={this.state.races} raceType={this.state.raceType}/>
           </div>
         </div>
@@ -88,7 +89,14 @@ class App extends Component {
 
     return (
       <div className="App container">
-        <h1 className="display-4 text-primary">next-to-go</h1>
+        <div className="row">
+          <div className="col-9">
+            <h1 className="display-4 text-primary">next-to-go</h1>
+          </div>
+          <div className="col-3">
+            { this.state.loading ? <span className="text-muted text-right">loading...</span> : null }
+          </div>
+        </div>
 
         { errorMessage }
         { body }
