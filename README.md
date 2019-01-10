@@ -7,6 +7,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 Checkout the project from GitHub:
 ```
 git clone git@github.com:jramoyo/next-to-go-racing.git
+cd next-to-go-racing
 ```
 
 Download project dependencies:
