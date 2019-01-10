@@ -57,16 +57,15 @@ class App extends Component {
 
   render() {
 
-    let errorMessage;
-    let body;
+    let content;
     if (this.state.error) {
-      errorMessage = (
+      content = (
         <div className="alert alert-danger" role="alert">
           Unable to load data.
         </div>
-      )
+      );
     } else {
-      body = (
+      content = (
         <div>
           <div className="row">
 
@@ -84,7 +83,7 @@ class App extends Component {
             <Cards races={this.state.races} raceType={this.state.raceType}/>
           </div>
         </div>
-      )
+      );
     }
 
     return (
@@ -98,8 +97,7 @@ class App extends Component {
           </div>
         </div>
 
-        { errorMessage }
-        { body }
+        { content }
 
       </div>
     );
