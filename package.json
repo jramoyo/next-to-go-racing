@@ -2,7 +2,9 @@
   "name": "next-to-go-racing",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://api.beta.tab.com.au",
   "dependencies": {
+    "axios": "^0.18.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-scripts": "2.1.3"
