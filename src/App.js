@@ -2,27 +2,30 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import './App.css';
 
+import JurisdictionSelect from './components/JurisdictionSelect';
+import RaceTypeSelect from './components/RaceTypeSelect';
+import Cards from './components/Cards';
+
+const API_PATH = '/v1/tab-info-service/racing/next-to-go/races';
+
 class App extends Component {
 
-  state = { races: [], filter: 'R', jurisdiction: 'NSW' }
+  state = { races: [], jurisdiction: 'NSW',  raceType: 'R', error: false }
 
   componentDidMount = () => {
-    this.nsw()
+    this.getNSW()
       .then(res => {
         this.setState({ races: res.data.races })
-      });
+      })
+      .catch(this.onError);
   }
 
-  nsw = () => axios.get('/v1/tab-info-service/racing/next-to-go/races?jurisdiction=NSW');
+  getNSW = () => axios.get(API_PATH + '?jurisdiction=NSW')
 
-  vic = () => axios.get('/v1/tab-info-service/racing/next-to-go/races?jurisdiction=VIC');
+  getVIC = () => axios.get(API_PATH + '?jurisdiction=VIC')
 
-  compareDate = (_a, _b) => {
-    const a = new Date(_a);
-    const b = new Date(_b);
-    if (a < b) return -1
-    if (a > b) return 1
-    if (a === b) return 0
+  onError = () => {
+     this.setState({ error: true });
   }
 
   onJurisdictionChanged = (e) => {
@@ -30,10 +33,10 @@ class App extends Component {
     const get = () => {
       switch (jurisdiction) {
         case 'NSW':
-          return this.nsw();
+          return this.getNSW();
         case 'VIC':
         default:
-          return this.vic();
+          return this.getVIC();
       }
     }
 
@@ -43,92 +46,52 @@ class App extends Component {
           jurisdiction: jurisdiction,
           races       : res.data.races
         });
-      });
+      })
+      .catch(this.onError);
   }
 
   onRaceTypeChanged = (e) => {
-    this.setState({ filter: e.currentTarget.value })
+    this.setState({ raceType: e.currentTarget.value })
   }
 
   render() {
-    const cards = this.state.races.filter(race => race.meeting.raceType === this.state.filter).sort(this.compareDate).map(race => {
-        return (
-          <div key={race.raceName + '_' + race.raceStartTime} className="col-sm-6">
-            <div className="card w-100">
-              <div className="card-body">
-                <h5 className="card-title">{race.raceName}</h5>
-                <h6 className="card-subtitle mb-2 text-muted">{new Date(race.raceStartTime).toDateString()}</h6>
-                <p className="card-text">Race Number: {race.raceNumber}</p>
-                <p className="card-text">Meeting Name: {race.meeting.meetingName}</p>
-                <p className="card-text">Meeting Location: {race.meeting.location}</p>
-                <p className="card-text">Meeting Date: {race.meeting.meetingDate}</p>
-              </div>
+
+    let errorMessage;
+    let body;
+    if (this.state.error) {
+      errorMessage = (
+        <div className="alert alert-danger" role="alert">
+          Unable to load data.
+        </div>
+      )
+    } else {
+      body = (
+        <div>
+          <div className="row">
+
+            <div className="col-4">
+              <JurisdictionSelect selected={this.state.jurisdiction} onJurisdictionChanged={this.onJurisdictionChanged} />
             </div>
+
+            <div className="col-8">
+              <RaceTypeSelect selected={this.state.raceType} onRaceTypeChanged={this.onRaceTypeChanged} />
+            </div>
+
           </div>
-        )
-    });
+
+          <div className="row">
+            <Cards races={this.state.races} raceType={this.state.raceType}/>
+          </div>
+        </div>
+      )
+    }
 
     return (
       <div className="App container">
+        <h1 className="display-4 text-primary">next-to-go</h1>
 
-        <div className="row">
-
-          <div className="col-4">
-            <div className="form-check form-check-inline">
-              <input id="jurisdiction-nsw"
-                     className="form-check-input"
-                     type="radio" name="jurisdiction"
-                     value='NSW'
-                     checked={this.state.jurisdiction === 'NSW'}
-                     onChange={this.onJurisdictionChanged} />
-              <label className="form-check-label" htmlFor="jurisdiction-nsw">NSW</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input id="jurisdiction-vic"
-                     className="form-check-input"
-                     type="radio" name="jurisdiction"
-                     value='VIC'
-                     checked={this.state.jurisdiction === 'VIC'}
-                     onChange={this.onJurisdictionChanged} />
-              <label className="form-check-label" htmlFor="jurisdiction-vic">VIC</label>
-            </div>
-          </div>
-
-          <div className="col-8">
-            <div className="form-check form-check-inline">
-              <input id="race-type-r"
-                     className="form-check-input"
-                     type="radio" name="filter"
-                     value='R'
-                     checked={this.state.filter === 'R'}
-                     onChange={this.onRaceTypeChanged} />
-              <label className="form-check-label" htmlFor="race-type-r">Thoroughbred</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input id="race-type-g"
-                     className="form-check-input"
-                     type="radio" name="filter"
-                     value='G'
-                     checked={this.state.filter === 'G'}
-                     onChange={this.onRaceTypeChanged} />
-              <label className="form-check-label" htmlFor="race-type-g">Greyhounds</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input id="race-type-h"
-                     className="form-check-input"
-                     type="radio" name="filter"
-                     value='H'
-                     checked={this.state.filter === 'H'}
-                     onChange={this.onRaceTypeChanged} />
-              <label className="form-check-label" htmlFor="race-type-h">Harness</label>
-            </div>
-          </div>
-
-        </div>
-
-        <div className="row">
-          {cards}
-        </div>
+        { errorMessage }
+        { body }
 
       </div>
     );
