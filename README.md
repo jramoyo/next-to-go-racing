@@ -10,6 +10,11 @@ git clone git@github.com:jramoyo/next-to-go-racing.git
 cd next-to-go-racing
 ```
 
+Ensure that the correct version of Node.js is loaded (only if `nvm` is available):
+```
+nvm use
+```
+
 Download project dependencies:
 ```
 npm install
