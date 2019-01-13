@@ -10,7 +10,7 @@ git clone git@github.com:jramoyo/next-to-go-racing.git
 cd next-to-go-racing
 ```
 
-Ensure that the correct version of Node.js is loaded (only if `nvm` is available):
+Ensure that version `v10.5.0` of Node.js is loaded (if `nvm` is available):
 ```
 nvm use
 ```
